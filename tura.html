@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Prošetajte kroz apartman – Apartman Banović, Sokobanja</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pannellum/2.5.6/pannellum.css">
+<style>
+  :root {
+    --bg: #f3f4f1;
+    --surface: #ffffff;
+    --text: #1f2a24;
+    --muted: #5d6a62;
+    --accent: #2f5d46;
+    --accent-text: #ffffff;
+    --line: #d9ded8;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141815;
+      --surface: #1e2420;
+      --text: #e8ece8;
+      --muted: #a3ada6;
+      --accent: #7fbf9c;
+      --accent-text: #10241a;
+      --line: #313a34;
+      color-scheme: dark;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    font-family: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.25rem 0.75rem;
+  }
+  h1 { font-size: 1.25rem; font-weight: 700; margin: 0; }
+  .back {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    white-space: nowrap;
+  }
+  .back:focus-visible, .room:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .viewer-wrap {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    margin: 0 1.25rem;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #000;
+  }
+  #panorama { width: 100%; height: 100%; }
+  .room-name {
+    position: absolute;
+    left: 0.75rem;
+    top: 0.75rem;
+    z-index: 3;
+    background: rgba(0,0,0,0.55);
+    color: #fff;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    pointer-events: none;
+  }
+  .hint {
+    position: absolute;
+    left: 50%;
+    bottom: 0.75rem;
+    transform: translateX(-50%);
+    z-index: 3;
+    background: rgba(0,0,0,0.55);
+    color: #fff;
+    padding: 0.35rem 0.8rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    pointer-events: none;
+    transition: opacity 0.6s;
+    white-space: nowrap;
+  }
+  .hint.hidden { opacity: 0; }
+  nav.rooms {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding: 0.85rem 1.25rem 1rem;
+    scrollbar-width: none;
+  }
+  nav.rooms::-webkit-scrollbar { display: none; }
+  .room {
+    flex: 0 0 auto;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    font-weight: 600;
+    font-size: 0.95rem;
+    padding: 0.55rem 1rem;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  .room[aria-current="true"] {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-text);
+  }
+
+  /* Strelice za prelazak između prostorija */
+  .go {
+    width: 46px;
+    height: 46px;
+    margin: -23px 0 0 -23px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.92);
+    box-shadow: 0 0 0 4px rgba(255,255,255,0.35);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .go::before {
+    content: "";
+    width: 14px;
+    height: 14px;
+    border-top: 4px solid #2f5d46;
+    border-right: 4px solid #2f5d46;
+    transform: translateX(-2px) rotate(45deg);
+  }
+  .go span {
+    position: absolute;
+    top: 54px;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    background: rgba(0,0,0,0.65);
+    color: #fff;
+    font-family: "Figtree", system-ui, sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    pointer-events: none;
+  }
+  @media (max-width: 600px) {
+    header { padding: 0.75rem 1rem 0.5rem; }
+    h1 { font-size: 1.1rem; }
+    .viewer-wrap { margin: 0; border-radius: 0; }
+    nav.rooms { padding: 0.75rem 1rem 0.85rem; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hint { transition: none; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Prošetajte kroz apartman</h1>
+  <a class="back" href="index.html">Nazad na početnu</a>
+</header>
+
+<div class="viewer-wrap">
+  <div id="panorama"></div>
+  <div class="room-name" id="roomName">Hodnik</div>
+  <div class="hint" id="hint">Prevucite da razgledate, kliknite strelicu za sledeću prostoriju</div>
+</div>
+
+<nav class="rooms" id="rooms" aria-label="Prostorije"></nav>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pannellum/2.5.6/pannellum.js"></script>
+<script>
+  // Strelica sa natpisom (natpis je uvek vidljiv, i na telefonu)
+  function arrow(div, label) {
+    div.classList.add("go");
+    var s = document.createElement("span");
+    s.textContent = label;
+    div.appendChild(s);
+  }
+  function go(yaw, pitch, scene, label) {
+    return { type: "scene", yaw: yaw, pitch: pitch, sceneId: scene,
+             cssClass: "go", createTooltipFunc: arrow, createTooltipArgs: label };
+  }
+
+  // Panorame snimljene telefonom: pun krug levo-desno, ograničen pogled gore-dole
+  var rooms = {
+    hodnik:   { title: "Hodnik",        image: "slike/hodnik.jpg",       haov: 360, vaov: 102.9,
+                hotSpots: [ go(6, -8, "spavaca", "Spavaća soba"),
+                            go(26, -8, "dnevna", "Dnevna soba"),
+                            go(46, -8, "kuhinja", "Kuhinja"),
+                            go(128, -8, "kupatilo", "Kupatilo") ] },
+    dnevna:   { title: "Dnevna soba",   image: "slike/dnevna-soba.jpg",  haov: 360, vaov: 98.7,
+                hotSpots: [ go(2, -6, "terasa", "Terasa"),
+                            go(-127, -8, "kuhinja", "Kuhinja"),
+                            go(-99, -8, "hodnik", "Hodnik") ] },
+    kuhinja:  { title: "Kuhinja",       image: "slike/kuhinja.jpg",      haov: 360, vaov: 96.8,
+                hotSpots: [ go(-79, -8, "dnevna", "Dnevna soba"),
+                            go(171, -8, "hodnik", "Hodnik") ] },
+    spavaca:  { title: "Spavaća soba",  image: "slike/spavaca-soba.jpg", haov: 360, vaov: 119,
+                hotSpots: [ go(112, -8, "hodnik", "Hodnik") ] },
+    kupatilo: { title: "Kupatilo",      image: "slike/kupatilo.jpg",     haov: 180, vaov: 113.6,
+                hotSpots: [ go(-68, -10, "hodnik", "Hodnik") ] },
+    terasa:   { title: "Terasa",        image: "slike/terasa.jpg",       haov: 180, vaov: 93.3,
+                hotSpots: [ go(81, -8, "dnevna", "Dnevna soba") ] }
+  };
+  var order = ["hodnik", "dnevna", "kuhinja", "spavaca", "kupatilo", "terasa"];
+
+  var scenes = {};
+  order.forEach(function (id) {
+    var r = rooms[id];
+    scenes[id] = {
+      type: "equirectangular",
+      panorama: r.image,
+      haov: r.haov,
+      vaov: r.vaov,
+      minPitch: -r.vaov / 2,
+      maxPitch: r.vaov / 2,
+      minYaw: r.haov < 360 ? -r.haov / 2 : -180,
+      maxYaw: r.haov < 360 ? r.haov / 2 : 180,
+      yaw: 0,
+      pitch: 0,
+      hfov: 90,
+      hotSpots: r.hotSpots
+    };
+  });
+
+  var viewer = pannellum.viewer("panorama", {
+    default: { firstScene: "hodnik", sceneFadeDuration: 600, autoLoad: true, showControls: true, compass: false },
+    scenes: scenes
+  });
+
+  // Dugmad sa prostorijama ispod ture
+  var nav = document.getElementById("rooms");
+  var roomName = document.getElementById("roomName");
+  order.forEach(function (id) {
+    var b = document.createElement("button");
+    b.className = "room";
+    b.type = "button";
+    b.textContent = rooms[id].title;
+    b.dataset.scene = id;
+    b.addEventListener("click", function () { viewer.loadScene(id); });
+    nav.appendChild(b);
+  });
+  function mark(id) {
+    roomName.textContent = rooms[id].title;
+    nav.querySelectorAll(".room").forEach(function (b) {
+      var on = b.dataset.scene === id;
+      b.setAttribute("aria-current", on ? "true" : "false");
+      if (on) b.scrollIntoView({ block: "nearest", inline: "nearest" });
+    });
+  }
+  mark("hodnik");
+  viewer.on("scenechange", mark);
+
+  // Uputstvo nestaje posle prvog pomeranja
+  var hint = document.getElementById("hint");
+  function hideHint() { hint.classList.add("hidden"); }
+  viewer.on("mousedown", hideHint);
+  viewer.on("touchstart", hideHint);
+  setTimeout(hideHint, 7000);
+</script>
+</body>
+</html>
